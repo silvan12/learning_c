@@ -176,8 +176,3 @@ int main()
 
     return 0;
 }
-
-// ai picks a word
-// display word as ____
-// player picks a letter
-// display word as __a_
