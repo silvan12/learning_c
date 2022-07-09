@@ -3,27 +3,84 @@
 #include <time.h>
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
+
+#define MAX_WORD_LEN 10
 
 #define LIVES 10
-#define LETTER_COUNT 26
+#define MAX_GUESSES 1024
 
 int lives;
+char word[MAX_WORD_LEN];
 
-const char words[10][10] = {"apple", "tree", "gun", "blue", "berry", "game", "program", "hunt", "banana"};
+void pick_word(char* file_path)
+{
+    FILE* file = fopen(file_path, "rb");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Could not open %s: %s\n", file_path, strerror(errno));
+        exit(1);
+    }
+
+    fseek(file, 0, SEEK_END);
+    size_t size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* data = malloc(size);
+
+    fread(data, size, 1, file);
+    fclose(file);
+    
+    size_t word_count = 0;
+    for (size_t i = 0; i < size; i++)
+    {
+        if (data[i] == '\n')
+        {
+            word_count++;
+        }
+    }
+
+    size_t word_index = rand() % word_count;
+
+    word_count = 0;
+    for (size_t i = 0; i < size; i++)
+    {
+        if (word_count == word_index)
+        {
+            int offset = 0;
+            while (data[i] != '\n' && data[i] != '\r')
+            {
+                word[offset] = data[i];
+
+                offset++;
+                i++;
+            }
+            word[offset] = 0;
+            break;
+        }
+
+        if (data[i] == '\n')
+        {
+            word_count++;
+        }
+    }
+
+    free(data);
+}
 
 char read_char()
 {
+ 
     char c;
 
     scanf("%c", &c);
 
-    while (getchar() != '\n')
-        ;
+    while (getchar() != '\n');
 
     return c;
 }
 
-void get_letter(char letters[LETTER_COUNT])
+void get_letter(char letters[MAX_GUESSES])
 {
     char letter;
 
@@ -33,7 +90,6 @@ void get_letter(char letters[LETTER_COUNT])
         printf("Guess a letter:\n> ");
         letter = read_char();
 
-        // TODO: Check if letter is already guessed
         bool already_guessed = false;
         for (int i = 0; i < strlen(letters); i++)
         {
@@ -58,15 +114,7 @@ void get_letter(char letters[LETTER_COUNT])
     letters[n] = letter;
 }
 
-const char *pick_word()
-{
-    // Random number from 0 to 8
-    int ai_pick = rand() % 8;
-
-    return words[ai_pick];
-}
-
-bool check(const char *word, char guessed_letters[LETTER_COUNT])
+bool check(const char *word, char guessed_letters[MAX_GUESSES])
 {
     int len = strlen(word);
     int len2 = strlen(guessed_letters);
@@ -118,7 +166,7 @@ bool check(const char *word, char guessed_letters[LETTER_COUNT])
     return word_correct;
 }
 
-int main()
+int main(int argc, char **argv)
 {
     system("cls");
 
@@ -127,9 +175,9 @@ int main()
 
     lives = LIVES;
 
-    const char *word = pick_word();
-    char guessed_letters[LETTER_COUNT];
-    memset(guessed_letters, 0, LETTER_COUNT);
+    pick_word(argv[1]);
+    char guessed_letters[MAX_GUESSES];
+    memset(guessed_letters, 0, MAX_GUESSES);
 
     bool win = true;
     while (!check(word, guessed_letters))
@@ -151,7 +199,7 @@ int main()
     }
     else
     {
-        printf("\nYou lose! The word was: %s\n\n", word);
+        printf("\nYou lose! The word was %s\n\n", word);
     }
 
     while (true)
@@ -161,7 +209,7 @@ int main()
         char play_again = read_char();
         if (play_again == 'y')
         {
-            return main();
+            return main(argc, argv);
         }
         else if (play_again == 'n')
         {

@@ -2,3 +2,5 @@
 *.exe
 # Ignore vscode folder
 .vscode
+# Ignore world list
+word_list.txt

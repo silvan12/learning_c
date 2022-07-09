@@ -10,9 +10,8 @@ Takes the amount of days from now and converts it into a string, of that day.
 ## `rpc.c`
 Rock, paper, scissor in the command line against an AI.
 ## `hangman.c`
-Hangman in the command line against an AI.
+Hangman in the command line against an AI. `./hangman <file_with_words>`
 
-> TODO: Generate random words from [list of all words](https://raw.githubusercontent.com/dwyl/english-words/master/words.txt)
 ## `ttt.c`
 TicTacToe in the command line against another player. 
 
